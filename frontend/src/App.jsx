@@ -77,11 +77,13 @@ function App() {
   const [showBackgroundModal, setShowBackgroundModal] = useState(false);
   const [showPoseModal, setShowPoseModal] = useState(false);
   const [showAgeModal, setShowAgeModal] = useState(false);
+  const [showCameraAngleModal, setShowCameraAngleModal] = useState(false);
   const [modelGender, setModelGender] = useState('girl'); // 'girl' or 'boy'
   const [ageGroup, setAgeGroup] = useState('child'); // 'child' or 'teen'
   const [ethnicity, setEthnicity] = useState('middle-eastern'); // ethnicity selection
   const [background, setBackground] = useState('beige-studio'); // background selection
   const [pose, setPose] = useState('classic-front'); // pose selection
+  const [cameraAngle, setCameraAngle] = useState('full-body'); // camera angle selection
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
   const [videoTaskId, setVideoTaskId] = useState(null);
@@ -149,6 +151,37 @@ function App() {
       description: 'Lightly holding sides of garment, elegant',
       emoji: '👗',
       color: 'red'
+    }
+  ];
+
+  const cameraAngles = [
+    { 
+      id: 'full-body', 
+      label: 'Full-Body',
+      description: 'Complete view from head to toe, showcasing entire outfit',
+      emoji: '📸',
+      color: 'blue'
+    },
+    { 
+      id: 'mid-shot', 
+      label: 'Mid-Shot (Waist Up)',
+      description: 'Focus on upper body and garment details',
+      emoji: '🎥',
+      color: 'green'
+    },
+    { 
+      id: 'low-angle', 
+      label: 'Low Angle (For Drama)',
+      description: 'Shot from below for powerful, dramatic effect',
+      emoji: '📐',
+      color: 'purple'
+    },
+    { 
+      id: 'top-angle', 
+      label: 'Top Angle (Editorial Effect)',
+      description: 'Overhead shot for editorial and creative campaigns',
+      emoji: '🔝',
+      color: 'orange'
     }
   ];
 
@@ -225,12 +258,18 @@ function App() {
     return selected ? selected.label : 'Child (5-8 years)';
   };
 
+  const getSelectedCameraAngle = () => {
+    const selected = cameraAngles.find(c => c.id === cameraAngle);
+    return selected ? selected.label : 'Full-Body';
+  };
+
   // Track which attributes are selected (not default/empty)
   const [hasSelectedModel, setHasSelectedModel] = useState(false);
   const [hasSelectedAge, setHasSelectedAge] = useState(false);
   const [hasSelectedEthnicity, setHasSelectedEthnicity] = useState(false);
   const [hasSelectedBackground, setHasSelectedBackground] = useState(false);
   const [hasSelectedPose, setHasSelectedPose] = useState(false);
+  const [hasSelectedCameraAngle, setHasSelectedCameraAngle] = useState(false);
 
   // Calculate image generation cost based on new rules
   const calculateImageCost = () => {
@@ -243,6 +282,7 @@ function App() {
     if (hasSelectedEthnicity) cost += 1;
     if (hasSelectedBackground) cost += 1;
     if (hasSelectedPose) cost += 1;
+    if (hasSelectedCameraAngle) cost += 1;
     
     return cost;
   };
@@ -296,7 +336,7 @@ function App() {
     }, 800);
 
     try {
-      const response = await generateDesign(garmentImage, modelGender, ethnicity, background, pose);
+      const response = await generateDesign(garmentImage, modelGender, ethnicity, background, pose, ageGroup, cameraAngle);
       clearInterval(progressInterval);
       setProgress(100);
       setProgressMessage('Complete!');
@@ -659,6 +699,25 @@ function App() {
                     <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedPose ? getSelectedPose().split(' ')[0] : t('random')}</div>
                   </div>
                 </button>
+
+                {/* Camera Angle Button */}
+                <button
+                  onClick={() => setShowCameraAngleModal(true)}
+                  className="p-4 rounded-xl border-2 border-gray-200 hover:border-purple-400 transition-all bg-white hover:bg-purple-50 relative"
+                  title="Selecting this category adds 1 credit to your image"
+                  aria-label="Camera angle selection, costs +1 credit"
+                >
+                  <div className={`absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded-full ${
+                    hasSelectedCameraAngle ? 'bg-green-500 text-white' : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    +1
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">{hasSelectedCameraAngle ? (cameraAngles.find(c => c.id === cameraAngle)?.emoji || '📸') : '🎲'}</div>
+                    <div className="text-xs font-semibold text-gray-900">{t('cameraAngle')}</div>
+                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedCameraAngle ? getSelectedCameraAngle().split(' ')[0] : t('random')}</div>
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -707,6 +766,12 @@ function App() {
                     {hasSelectedPose && (
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-700">+ {t('pose')}</span>
+                        <span className="font-semibold text-green-600">1</span>
+                      </div>
+                    )}
+                    {hasSelectedCameraAngle && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-700">+ {t('cameraAngle')}</span>
                         <span className="font-semibold text-green-600">1</span>
                       </div>
                     )}
@@ -1441,114 +1506,174 @@ function App() {
         </div>
       )}
 
+      {/* Camera Angle Selection Modal */}
+      {showCameraAngleModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 flex items-center justify-center p-4" onClick={() => setShowCameraAngleModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">{t('cameraAngle')}</h3>
+              <button onClick={() => setShowCameraAngleModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {/* Random Option */}
+              <button
+                onClick={() => {
+                  setHasSelectedCameraAngle(false);
+                  setShowCameraAngleModal(false);
+                }}
+                className={`w-full p-4 rounded-lg border-2 transition-all ${
+                  !hasSelectedCameraAngle ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl flex-shrink-0">🎲</div>
+                  <div className="text-left flex-1">
+                    <div className={`font-semibold text-sm ${!hasSelectedCameraAngle ? 'text-purple-600' : 'text-gray-900'}`}>
+                      {t('randomPose')}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">{t('randomPoseDesc')}</div>
+                  </div>
+                </div>
+              </button>
+              
+              {cameraAngles.map((angle) => {
+                const colorClasses = {
+                  blue: hasSelectedCameraAngle && cameraAngle === angle.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300',
+                  green: hasSelectedCameraAngle && cameraAngle === angle.id ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300',
+                  purple: hasSelectedCameraAngle && cameraAngle === angle.id ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300',
+                  orange: hasSelectedCameraAngle && cameraAngle === angle.id ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'
+                };
+                const textColorClasses = {
+                  blue: 'text-blue-600',
+                  green: 'text-green-600',
+                  purple: 'text-purple-600',
+                  orange: 'text-orange-600'
+                };
+                return (
+                  <button
+                    key={angle.id}
+                    onClick={() => {
+                      setCameraAngle(angle.id);
+                      setHasSelectedCameraAngle(true);
+                      setShowCameraAngleModal(false);
+                    }}
+                    className={`w-full p-4 rounded-lg border-2 transition-all ${colorClasses[angle.color]}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="text-3xl flex-shrink-0">{angle.emoji}</div>
+                      <div className="text-left flex-1">
+                        <div className={`font-semibold text-sm ${hasSelectedCameraAngle && cameraAngle === angle.id ? textColorClasses[angle.color] : 'text-gray-900'}`}>
+                          {angle.label}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">{angle.description}</div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Pricing Modal */}
       {showPricing && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 flex items-center justify-center p-4" onClick={() => setShowPricing(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900">Credit Pricing</h3>
-                <p className="text-gray-600 text-sm mt-1">Pay only for what you use</p>
-              </div>
+              <h3 className="text-xl font-bold text-gray-900">{t('creditPricing')}</h3>
               <button onClick={() => setShowPricing(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-6 h-6 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
 
-            {/* Current Credits */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 mb-6">
+            {/* Current Balance */}
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Your Current Balance</p>
-                  <p className="text-3xl font-bold text-green-900">{credits} Credits</p>
+                  <p className="text-xs text-gray-600">{t('currentBalance')}</p>
+                  <p className="text-2xl font-bold text-green-900">{credits} {t('credits')}</p>
                 </div>
-                <Sparkles className="w-12 h-12 text-green-600" />
+                <Sparkles className="w-8 h-8 text-green-600" />
               </div>
             </div>
 
-            {/* Image Generation Pricing */}
-            <div className="mb-6">
-              <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Camera className="w-5 h-5 text-purple-600" />
-                Image Generation
-              </h4>
-              <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-5">
-                <div className="mb-4">
-                  <p className="font-semibold text-purple-900 text-lg mb-2">Pricing Structure:</p>
-                  <div className="bg-white rounded-lg p-3 mb-3 border border-purple-200">
-                    <p className="font-semibold text-purple-900 text-sm mb-1">Base Cost</p>
-                    <p className="text-xs text-gray-600">Upload Garment → <strong>4 credits</strong> (always required)</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 border border-purple-200">
-                    <p className="font-semibold text-purple-900 text-sm mb-1">Optional Selections</p>
-                    <p className="text-xs text-gray-600">Choose any attributes → <strong>+1 credit each</strong></p>
-                  </div>
-                </div>
-                <div className="border-t border-purple-200 pt-4">
-                  <p className="font-semibold text-purple-900 mb-3">Available Selections (+1 credit each):</p>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                      <span className="text-gray-700">Model (Girl/Boy)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                      <span className="text-gray-700">Age Group</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                      <span className="text-gray-700">Ethnicity</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                      <span className="text-gray-700">Background</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                      <span className="text-gray-700">Pose</span>
-                    </div>
-                  </div>
-                  <div className="mt-4 p-3 bg-white rounded-lg border border-purple-200">
-                    <p className="text-xs text-gray-600 mb-1">Your Current Cost:</p>
-                    <p className="text-xl font-bold text-purple-900">{calculateImageCost()} Credits</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {calculateImageCost() === 4 ? '(Base only - no selections)' : `(Base 4 + ${calculateImageCost() - 4} selection${calculateImageCost() - 4 > 1 ? 's' : ''})`}
-                    </p>
-                  </div>
-                </div>
+            {/* How Credits Work */}
+            <div className="mb-6 p-4 bg-purple-50 rounded-xl border border-purple-200">
+              <p className="text-sm font-semibold text-purple-900 mb-3">💳 {t('howCreditsWork')}</p>
+              <div className="space-y-2 text-xs text-gray-700">
+                <p>📸 <strong>{t('imageGeneration')}:</strong> 4-10 {t('credits').toLowerCase()}</p>
+                <p className="ml-5 text-gray-600">• Base: 4 credits</p>
+                <p className="ml-5 text-gray-600">• +1 per customization</p>
+                <p className="mt-2">🎬 <strong>{t('videoGeneration')}:</strong> 6 {t('credits').toLowerCase()}</p>
               </div>
             </div>
 
-            {/* Video Generation Pricing */}
-            <div>
-              <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Video className="w-5 h-5 text-blue-600" />
-                Video Generation
-              </h4>
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-5">
+            {/* Credit Packages */}
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-gray-900 mb-3">💰 {t('buyCredits')}</p>
+              
+              {/* Starter Package */}
+              <button className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-purple-400 transition-all bg-white hover:bg-purple-50">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-blue-900 text-lg">Fixed Price: 6 Credits</p>
-                    <p className="text-sm text-gray-600 mt-1">6-second animated video from your photoshoot</p>
+                  <div className="text-left">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">⭐</span>
+                      <span className="font-bold text-gray-900">{t('starterPack')}</span>
+                    </div>
+                    <p className="text-xs text-gray-600">~12 {t('photoshoots').toLowerCase()}</p>
                   </div>
-                  <div className="text-4xl font-bold text-blue-600">6</div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-600">50</p>
+                    <p className="text-xs text-gray-600">$9.90</p>
+                  </div>
                 </div>
-              </div>
+              </button>
+
+              {/* Popular Package */}
+              <button className="w-full p-4 rounded-xl border-2 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-all relative">
+                <div className="absolute -top-2 right-4 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  {t('popular')}
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-left">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">🔥</span>
+                      <span className="font-bold text-gray-900">{t('popularPack')}</span>
+                    </div>
+                    <p className="text-xs text-gray-600">~25 {t('photoshoots').toLowerCase()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-600">100</p>
+                    <p className="text-xs text-gray-600">$17.99</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Pro Package */}
+              <button className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-purple-400 transition-all bg-white hover:bg-purple-50">
+                <div className="flex items-center justify-between">
+                  <div className="text-left">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">💎</span>
+                      <span className="font-bold text-gray-900">{t('proPack')}</span>
+                    </div>
+                    <p className="text-xs text-gray-600">~50 {t('photoshoots').toLowerCase()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-600">200</p>
+                    <p className="text-xs text-gray-600">$29.99</p>
+                  </div>
+                </div>
+              </button>
             </div>
 
-            {/* Example Calculation */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-              <p className="text-xs font-semibold text-gray-700 mb-2">💡 Examples:</p>
-              <p className="text-xs text-gray-600 mb-2">
-                <strong>No selections:</strong> Base (4) = <span className="font-bold">4 credits</span>
-              </p>
-              <p className="text-xs text-gray-600 mb-2">
-                <strong>2 selections:</strong> Base (4) + Ethnicity (1) + Background (1) = <span className="font-bold">6 credits</span>
-              </p>
-              <p className="text-xs text-gray-600">
-                <strong>All selections + video:</strong> Base (4) + Model (1) + Age (1) + Ethnicity (1) + Background (1) + Pose (1) + Video (6) = <span className="font-bold text-gray-900">15 Credits Total</span>
-              </p>
-            </div>
+            {/* Note */}
+            <p className="text-xs text-gray-500 text-center mt-4">
+              💡 {t('creditsNeverExpire')}
+            </p>
           </div>
         </div>
       )}

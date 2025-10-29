@@ -62,13 +62,17 @@ export const generateDesign = async (req, res) => {
     const ethnicity = req.body.ethnicity || 'middle-eastern'; // Default ethnicity
     const background = req.body.background || 'beige-studio'; // Default background
     const pose = req.body.pose || 'classic-front'; // Default pose
+    const ageGroup = req.body.ageGroup || 'child'; // Default age group
+    const cameraAngle = req.body.cameraAngle || 'full-body'; // Default camera angle
 
     console.log('Processing garment image:', {
       garment: garmentFile.filename,
       modelGender: modelGender,
       ethnicity: ethnicity,
       background: background,
-      pose: pose
+      pose: pose,
+      ageGroup: ageGroup,
+      cameraAngle: cameraAngle
     });
 
     const apiKey = process.env.WIRO_API_KEY;
@@ -123,12 +127,28 @@ export const generateDesign = async (req, res) => {
       'holding-dress': 'feet together or slightly apart, lightly holding the sides of the garment with gentle expression, elegant and poised'
     };
     
+    // Map age group to descriptive text
+    const ageGroupDescriptions = {
+      'child': 'young child aged 5-8 years old',
+      'teen': 'teenage model aged 15-18 years old'
+    };
+    
+    // Map camera angle to descriptive text
+    const cameraAngleDescriptions = {
+      'full-body': 'Full-body shot showing the complete view from head to toe, capturing the entire outfit and model',
+      'mid-shot': 'Mid-shot framing from waist up, focusing on upper body and garment details with closer perspective',
+      'low-angle': 'Low angle shot taken from below looking up at the model, creating a dramatic and powerful effect',
+      'top-angle': 'Top angle overhead shot looking down at the model, editorial style with creative perspective'
+    };
+    
     const ethnicityText = ethnicityDescriptions[ethnicity] || 'Middle Eastern';
     const backgroundText = backgroundDescriptions[background] || 'soft beige studio background with wooden floor';
     const poseText = poseDescriptions[pose] || 'standing tall facing forward with arms relaxed at sides';
+    const ageText = ageGroupDescriptions[ageGroup] || 'young child aged 5-8 years old';
+    const cameraAngleText = cameraAngleDescriptions[cameraAngle] || 'Full-body shot showing the complete view from head to toe';
     const hijabNote = ethnicity === 'middle-eastern-hijab' ? ' The child is wearing a traditional hijab as part of their cultural attire.' : '';
     
-    formData.append('prompt', `Professional photoshoot of a cute ${ethnicityText} ${genderText} kid model wearing this garment. Background: ${backgroundText}. Pose: ${poseText}. Studio lighting, fashion photography, high quality, the child should be smiling naturally. The garment should fit perfectly and ${pronouns} should look stylish and confident. Professional fashion catalog style.${hijabNote}`);
+    formData.append('prompt', `Professional photoshoot of a cute ${ethnicityText} ${genderText} kid model (${ageText}) wearing this garment. Camera angle: ${cameraAngleText}. Background: ${backgroundText}. Pose: ${poseText}. Studio lighting, fashion photography, high quality, the child should be smiling naturally. The garment should fit perfectly and ${pronouns} should look stylish and confident. Professional fashion catalog style.${hijabNote}`);
     formData.append('temperature', '0.9');
 
     // Make request to Wiro.ai Nano Banana model

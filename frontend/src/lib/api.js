@@ -1,12 +1,14 @@
 import axios from 'axios';
 
-export const generateDesign = async (garmentImage, modelGender = 'girl', ethnicity = 'middle-eastern', background = 'beige-studio', pose = 'classic-front') => {
+export const generateDesign = async (garmentImage, modelGender = 'girl', ethnicity = 'middle-eastern', background = 'beige-studio', pose = 'classic-front', ageGroup = 'child', cameraAngle = 'full-body') => {
   const formData = new FormData();
   formData.append('garment', garmentImage);
   formData.append('modelGender', modelGender);
   formData.append('ethnicity', ethnicity);
   formData.append('background', background);
   formData.append('pose', pose);
+  formData.append('ageGroup', ageGroup);
+  formData.append('cameraAngle', cameraAngle);
 
   const response = await axios.post('/api/design/generate', formData, {
     headers: {

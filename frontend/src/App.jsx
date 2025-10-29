@@ -3,8 +3,9 @@ import { Sparkles, Loader2, Upload, X, Shirt, Camera, Download, Image as ImageIc
 import { generateDesign, generateVideo, getVideoStatus } from './lib/api';
 import Gallery from './components/Gallery';
 import Profile from './components/Profile';
+import { translations } from './translations';
 
-function ImageUpload({ title, icon, description, image, onImageChange }) {
+function ImageUpload({ title, icon, description, image, onImageChange, t }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -32,8 +33,8 @@ function ImageUpload({ title, icon, description, image, onImageChange }) {
         <label className="block cursor-pointer">
           <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
             <Upload className="w-12 h-12 text-gray-400 mb-3" />
-            <span className="text-sm font-medium text-gray-700">Click to upload</span>
-            <span className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</span>
+            <span className="text-sm font-medium text-gray-700">{t('clickToUpload')}</span>
+            <span className="text-xs text-gray-500 mt-1">{t('fileFormat')}</span>
           </div>
           <input
             type="file"
@@ -90,6 +91,11 @@ function App() {
   const [videoProgressMessage, setVideoProgressMessage] = useState('');
   const [credits, setCredits] = useState(100); // Starting credits
   const [showPricing, setShowPricing] = useState(false);
+  const [language, setLanguage] = useState('en'); // 'en' or 'tr'
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  
+  // Get translation helper
+  const t = (key) => translations[language][key] || key;
 
   const ageGroups = [
     {
@@ -459,38 +465,47 @@ function App() {
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  ModaModel Kids
+                  {t('appTitle')}
                 </h1>
-                <p className="text-gray-600 text-sm mt-1">AI-Powered Fashion Photography</p>
+                <p className="text-gray-600 text-sm mt-1">{t('appSubtitle')}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               {/* Credits Display */}
               <div className="flex items-center gap-2 bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-full border-2 border-green-200">
                 <Sparkles className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-bold text-green-900">{credits} Credits</span>
+                <span className="text-sm font-bold text-green-900">{credits} {t('credits')}</span>
               </div>
+              
+              {/* Language Selection Button */}
+              <button
+                onClick={() => setShowLanguageModal(true)}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-cyan-100 hover:from-blue-200 hover:to-cyan-200 px-4 py-2 rounded-full transition-colors border-2 border-blue-200"
+              >
+                <span className="text-lg">{language === 'en' ? '🇬🇧' : '🇹🇷'}</span>
+                <span className="text-sm font-medium text-blue-900">{t('language')}</span>
+              </button>
               
               <button
                 onClick={() => setShowPricing(true)}
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 px-4 py-2 rounded-full transition-colors"
               >
                 <DollarSign className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-900">Pricing</span>
+                <span className="text-sm font-medium text-purple-900">{t('pricing')}</span>
               </button>
               <button
                 onClick={() => setShowGallery(true)}
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 px-4 py-2 rounded-full transition-colors"
               >
                 <ImageIcon className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-900">Gallery</span>
+                <span className="text-sm font-medium text-purple-900">{t('gallery')}</span>
               </button>
               <button
                 onClick={() => setShowProfile(true)}
                 className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-full transition-colors shadow-md"
               >
                 <User className="w-4 h-4" />
-                <span className="text-sm font-medium">Profile</span>
+                <span className="text-sm font-medium">{t('profile')}</span>
               </button>
             </div>
           </div>
@@ -503,17 +518,16 @@ function App() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" />
-            <span>AI-Powered Fashion Technology</span>
+            <span>{t('heroTag')}</span>
           </div>
           <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Transform Garments into
+            {t('heroTitle1')}
             <span className="block bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Professional Photoshoots
+              {t('heroTitle2')}
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Upload a kids garment and watch our AI create stunning professional photoshoots
-            with adorable kid models. Perfect for catalogs, e-commerce, and marketing!
+            {t('heroDescription')}
           </p>
         </div>
 
@@ -531,23 +545,24 @@ function App() {
                 4 credits
               </div>
               <div className="mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Upload Garment</h3>
-                <p className="text-gray-600 text-sm">Get professional photoshoot in seconds</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">{t('uploadTitle')}</h3>
+                <p className="text-gray-600 text-sm">{t('uploadSubtitle')}</p>
               </div>
               <ImageUpload
-                title="Kids Garment"
+                title={t('kidsGarment')}
                 icon={<Shirt className="w-6 h-6" />}
-                description="Upload a clear photo"
+                description={t('uploadClear')}
                 image={garmentImage}
                 onImageChange={setGarmentImage}
+                t={t}
               />
             </div>
 
             {/* Compact Selection Buttons */}
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-purple-100">
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-1">Photoshoot Settings</h3>
-                <p className="text-gray-600 text-sm">Click to customize your photoshoot</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">{t('settingsTitle')}</h3>
+                <p className="text-gray-600 text-sm">{t('settingsSubtitle')}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {/* Model Preference Button */}
@@ -564,8 +579,8 @@ function App() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl mb-2">{hasSelectedModel ? (modelGender === 'girl' ? '👧' : '👦') : '🎲'}</div>
-                    <div className="text-xs font-semibold text-gray-900">Model</div>
-                    <div className="text-xs text-gray-600 mt-1">{hasSelectedModel ? (modelGender === 'girl' ? 'Girl' : 'Boy') : 'Random'}</div>
+                    <div className="text-xs font-semibold text-gray-900">{t('model')}</div>
+                    <div className="text-xs text-gray-600 mt-1">{hasSelectedModel ? (modelGender === 'girl' ? t('girlModel').split(' ')[0] : t('boyModel').split(' ')[0]) : t('random')}</div>
                   </div>
                 </button>
 
@@ -583,8 +598,8 @@ function App() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl mb-2">{hasSelectedAge ? (ageGroups.find(a => a.id === ageGroup)?.emoji || '👧👦') : '🎲'}</div>
-                    <div className="text-xs font-semibold text-gray-900">Age</div>
-                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedAge ? (ageGroup === 'child' ? '5-8 yrs' : '15-18 yrs') : 'Random'}</div>
+                    <div className="text-xs font-semibold text-gray-900">{t('age')}</div>
+                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedAge ? (ageGroup === 'child' ? '5-8 ' + (language === 'tr' ? 'yaş' : 'yrs') : '15-18 ' + (language === 'tr' ? 'yaş' : 'yrs')) : t('random')}</div>
                   </div>
                 </button>
 
@@ -602,8 +617,8 @@ function App() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl mb-2">{hasSelectedEthnicity ? (currentEthnicities.find(e => e.id === ethnicity)?.emoji || '👧🏽') : '🎲'}</div>
-                    <div className="text-xs font-semibold text-gray-900">Ethnicity</div>
-                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedEthnicity ? getSelectedEthnicity().split(' ')[0] : 'Random'}</div>
+                    <div className="text-xs font-semibold text-gray-900">{t('ethnicity')}</div>
+                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedEthnicity ? getSelectedEthnicity().split(' ')[0] : t('random')}</div>
                   </div>
                 </button>
 
@@ -621,8 +636,8 @@ function App() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl mb-2">{hasSelectedBackground ? (backgrounds.find(b => b.id === background)?.emoji || '🏠') : '🎲'}</div>
-                    <div className="text-xs font-semibold text-gray-900">Background</div>
-                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedBackground ? getSelectedBackground().split(' ')[0] : 'Random'}</div>
+                    <div className="text-xs font-semibold text-gray-900">{t('background')}</div>
+                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedBackground ? getSelectedBackground().split(' ')[0] : t('random')}</div>
                   </div>
                 </button>
 
@@ -640,8 +655,8 @@ function App() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl mb-2">{hasSelectedPose ? (poses.find(p => p.id === pose)?.emoji || '🧍') : '🎲'}</div>
-                    <div className="text-xs font-semibold text-gray-900">Pose</div>
-                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedPose ? getSelectedPose().split(' ')[0] : 'Random'}</div>
+                    <div className="text-xs font-semibold text-gray-900">{t('pose')}</div>
+                    <div className="text-xs text-gray-600 mt-1 truncate">{hasSelectedPose ? getSelectedPose().split(' ')[0] : t('random')}</div>
                   </div>
                 </button>
               </div>
@@ -651,7 +666,7 @@ function App() {
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-5 shadow-lg">
               <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-purple-600" />
-                Cost Breakdown
+                {t('costBreakdown')}
               </h4>
               
               <div className="space-y-2 mb-3">
@@ -660,65 +675,65 @@ function App() {
                   <>
                     {/* Base Upload Cost */}
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-700 font-medium">Upload Garment</span>
+                      <span className="text-gray-700 font-medium">{t('uploadGarment')}</span>
                       <span className="font-bold text-purple-900">4</span>
                     </div>
                     
                     {/* Show selections if any */}
                     {hasSelectedModel && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-700">+ Model</span>
+                        <span className="text-gray-700">+ {t('model')}</span>
                         <span className="font-semibold text-green-600">1</span>
                       </div>
                     )}
                     {hasSelectedAge && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-700">+ Age</span>
+                        <span className="text-gray-700">+ {t('age')}</span>
                         <span className="font-semibold text-green-600">1</span>
                       </div>
                     )}
                     {hasSelectedEthnicity && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-700">+ Ethnicity</span>
+                        <span className="text-gray-700">+ {t('ethnicity')}</span>
                         <span className="font-semibold text-green-600">1</span>
                       </div>
                     )}
                     {hasSelectedBackground && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-700">+ Background</span>
+                        <span className="text-gray-700">+ {t('background')}</span>
                         <span className="font-semibold text-green-600">1</span>
                       </div>
                     )}
                     {hasSelectedPose && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-700">+ Pose</span>
+                        <span className="text-gray-700">+ {t('pose')}</span>
                         <span className="font-semibold text-green-600">1</span>
                       </div>
                     )}
                     
                     {/* Show helper text if no selections */}
                     {calculateImageCost() === 4 && (
-                      <p className="text-xs text-gray-600 italic pt-1">No selections - we'll randomize all settings</p>
+                      <p className="text-xs text-gray-600 italic pt-1">{t('noSelectionsMessage')}</p>
                     )}
                   </>
                 ) : (
                   /* Show message when no image uploaded */
                   <div className="text-center py-4">
-                    <p className="text-sm text-gray-500 italic">Upload a garment to see cost breakdown</p>
+                    <p className="text-sm text-gray-500 italic">{t('uploadCostMessage')}</p>
                   </div>
                 )}
               </div>
               
               <div className="border-t-2 border-purple-300 pt-3 mb-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-gray-900">Subtotal</span>
+                  <span className="text-sm font-bold text-gray-900">{t('subtotal')}</span>
                   <span className="text-2xl font-bold text-purple-900">{garmentImage ? calculateImageCost() : 0}</span>
                 </div>
               </div>
               
               <div className="bg-white rounded-lg p-3 border border-purple-200">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Your Balance</span>
+                  <span className="text-gray-600">{t('yourBalance')}</span>
                   <span className="text-lg font-bold text-green-600">{credits}</span>
                 </div>
               </div>
@@ -734,18 +749,18 @@ function App() {
                 {loading ? (
                   <>
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    Creating Magic...
+                    {t('creatingMagic')}
                   </>
                 ) : credits < calculateImageCost() ? (
                   <>
-                    <span>Not Enough Credits</span>
+                    <span>{t('notEnoughCredits')}</span>
                   </>
                 ) : (
                   <>
                     <Camera className="w-6 h-6" />
                     <div className="flex flex-col items-center">
-                      <span>Generate Photoshoot</span>
-                      <span className="text-xs font-normal opacity-90">{calculateImageCost()} credits</span>
+                      <span>{t('generatePhotoshoot')}</span>
+                      <span className="text-xs font-normal opacity-90">{calculateImageCost()} {t('credits').toLowerCase()}</span>
                     </div>
                   </>
                 )}
@@ -756,7 +771,7 @@ function App() {
                   onClick={handleReset}
                   className="w-full px-8 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all shadow-lg"
                 >
-                  Start Over
+                  {t('startOver')}
                 </button>
               )}
             </div>
@@ -776,9 +791,9 @@ function App() {
                 <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-6 rounded-full mb-6">
                   <Camera className="w-16 h-16 text-purple-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Your Photoshoot Will Appear Here</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">{t('photoshootAppear')}</h3>
                 <p className="text-gray-600 max-w-sm">
-                  Upload a garment and click generate to see the magic happen!
+                  {t('photoshootAppearDesc')}
                 </p>
               </div>
             )}
@@ -790,7 +805,7 @@ function App() {
                   <Loader2 className="relative w-20 h-20 text-purple-600 animate-spin" />
                 </div>
                 <div className="text-center w-full max-w-md">
-                  <p className="text-2xl font-bold text-gray-900 mb-2">Creating Your Photoshoot</p>
+                  <p className="text-2xl font-bold text-gray-900 mb-2">{t('creatingPhotoshoot')}</p>
                   <p className="text-purple-700 font-medium mb-6">{progressMessage}</p>
                   
                   {/* Progress Bar with Percentage */}
@@ -806,29 +821,29 @@ function App() {
                   {/* Percentage Display */}
                   <div className="flex items-center justify-between text-sm mb-4">
                     <span className="text-gray-600 font-medium">{progress}%</span>
-                    <span className="text-gray-500">Usually takes 10-20 seconds</span>
+                    <span className="text-gray-500">{t('usuallyTakes')}</span>
                   </div>
                   
                   {/* Progress Steps */}
                   <div className="flex items-center justify-between text-xs text-gray-400 mt-6">
                     <div className={`flex flex-col items-center ${progress >= 25 ? 'text-purple-600' : ''}`}>
                       <div className={`w-2 h-2 rounded-full mb-1 ${progress >= 25 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-                      <span>Upload</span>
+                      <span>{t('upload')}</span>
                     </div>
                     <div className="flex-1 h-px bg-gray-300 mx-2"></div>
                     <div className={`flex flex-col items-center ${progress >= 55 ? 'text-purple-600' : ''}`}>
                       <div className={`w-2 h-2 rounded-full mb-1 ${progress >= 55 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-                      <span>Generate</span>
+                      <span>{t('generate')}</span>
                     </div>
                     <div className="flex-1 h-px bg-gray-300 mx-2"></div>
                     <div className={`flex flex-col items-center ${progress >= 85 ? 'text-purple-600' : ''}`}>
                       <div className={`w-2 h-2 rounded-full mb-1 ${progress >= 85 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-                      <span>Finalize</span>
+                      <span>{t('finalize')}</span>
                     </div>
                     <div className="flex-1 h-px bg-gray-300 mx-2"></div>
                     <div className={`flex flex-col items-center ${progress === 100 ? 'text-green-600' : ''}`}>
                       <div className={`w-2 h-2 rounded-full mb-1 ${progress === 100 ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-                      <span>Done</span>
+                      <span>{t('done')}</span>
                     </div>
                   </div>
                 </div>
@@ -844,8 +859,8 @@ function App() {
                         <Sparkles className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white">Professional Photoshoot</h3>
-                        <p className="text-purple-100 text-xs">Ready to download</p>
+                        <h3 className="text-lg font-bold text-white">{t('professionalPhotoshoot')}</h3>
+                        <p className="text-purple-100 text-xs">{t('readyToDownload')}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -854,11 +869,11 @@ function App() {
                         className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg font-semibold text-sm transition-colors"
                       >
                         <Maximize2 className="w-4 h-4" />
-                        Fullscreen
+                        {t('fullscreen')}
                       </button>
                       <button className="flex items-center gap-2 bg-white text-purple-600 px-3 py-1.5 rounded-lg font-semibold text-sm hover:bg-purple-50 transition-colors">
                         <Download className="w-4 h-4" />
-                        Download
+                        {t('download')}
                       </button>
                     </div>
                   </div>
@@ -987,33 +1002,33 @@ function App() {
         {/* Instructions */}
         {!result && !loading && (
           <div className="max-w-3xl mx-auto mt-16">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">How It Works</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t('howItWorks')}</h3>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div className="bg-pink-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <span className="text-2xl font-bold text-pink-600">1</span>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Upload Garment</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">{t('step1Title')}</h4>
                 <p className="text-gray-600 text-sm">
-                  Upload a clear photo of the kids garment you want to showcase
+                  {t('step1Desc')}
                 </p>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div className="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <span className="text-2xl font-bold text-purple-600">2</span>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">AI Processing</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">{t('step2Title')}</h4>
                 <p className="text-gray-600 text-sm">
-                  Our AI generates a professional photoshoot with a kid model
+                  {t('step2Desc')}
                 </p>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                   <span className="text-2xl font-bold text-blue-600">3</span>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Download Result</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">{t('step3Title')}</h4>
                 <p className="text-gray-600 text-sm">
-                  Get your professional photoshoot ready for catalogs or e-commerce
+                  {t('step3Desc')}
                 </p>
               </div>
             </div>
@@ -1025,7 +1040,7 @@ function App() {
       <footer className="bg-white border-t border-gray-200 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="text-center text-gray-600">
-            Powered by AI • Professional Fashion Photography
+            {t('footerText')}
           </p>
         </div>
       </footer>
@@ -1122,6 +1137,54 @@ function App() {
                   <div className="text-4xl mb-3">👦</div>
                   <div className={`font-semibold ${hasSelectedModel && modelGender === 'boy' ? 'text-blue-600' : 'text-gray-700'}`}>
                     Boy Model
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Language Selection Modal */}
+      {showLanguageModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 flex items-center justify-center p-4" onClick={() => setShowLanguageModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">{t('language')}</h3>
+              <button onClick={() => setShowLanguageModal(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => {
+                  setLanguage('en');
+                  setShowLanguageModal(false);
+                }}
+                className={`p-6 rounded-xl border-2 transition-all ${
+                  language === 'en' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-4xl mb-3">🇬🇧</div>
+                  <div className={`font-semibold ${language === 'en' ? 'text-blue-600' : 'text-gray-700'}`}>
+                    English
+                  </div>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setLanguage('tr');
+                  setShowLanguageModal(false);
+                }}
+                className={`p-6 rounded-xl border-2 transition-all ${
+                  language === 'tr' ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-300'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-4xl mb-3">🇹🇷</div>
+                  <div className={`font-semibold ${language === 'tr' ? 'text-red-600' : 'text-gray-700'}`}>
+                    Türkçe
                   </div>
                 </div>
               </button>

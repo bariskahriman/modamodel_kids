@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Upload, X, Shirt, Camera, Download, Image as ImageIcon, User, DollarSign, ZoomIn, ZoomOut, Maximize2, Video } from 'lucide-react';
+import { Sparkles, Loader2, Upload, X, Shirt, Camera, Download, Image as ImageIcon, User, DollarSign, ZoomIn, ZoomOut, Maximize2, Video, Menu, ChevronDown, LogOut, HelpCircle, Settings } from 'lucide-react';
 import { generateDesign, generateVideo, getVideoStatus } from './lib/api';
 import Gallery from './components/Gallery';
 import Profile from './components/Profile';
@@ -78,6 +78,7 @@ function App() {
   const [showPoseModal, setShowPoseModal] = useState(false);
   const [showAgeModal, setShowAgeModal] = useState(false);
   const [showCameraAngleModal, setShowCameraAngleModal] = useState(false);
+  const [showVideoPromptModal, setShowVideoPromptModal] = useState(false);
   const [modelGender, setModelGender] = useState('girl'); // 'girl' or 'boy'
   const [ageGroup, setAgeGroup] = useState('child'); // 'child' or 'teen'
   const [ethnicity, setEthnicity] = useState('middle-eastern'); // ethnicity selection
@@ -95,6 +96,8 @@ function App() {
   const [showPricing, setShowPricing] = useState(false);
   const [language, setLanguage] = useState('en'); // 'en' or 'tr'
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   
   // Get translation helper
   const t = (key) => translations[language][key] || key;
@@ -310,17 +313,17 @@ function App() {
     setError(null);
     setResult(null);
     setProgress(0);
-    setProgressMessage('Initializing...');
+    setProgressMessage(t('initializing'));
 
     // Simulate realistic progress
     const progressSteps = [
-      { progress: 10, message: 'Uploading garment image...', delay: 500 },
-      { progress: 25, message: 'Analyzing garment details...', delay: 1000 },
-      { progress: 40, message: 'Preparing AI model...', delay: 1500 },
-      { progress: 55, message: 'Generating photoshoot...', delay: 2000 },
-      { progress: 70, message: 'Applying lighting effects...', delay: 3000 },
-      { progress: 85, message: 'Finalizing image...', delay: 4000 },
-      { progress: 95, message: 'Almost ready...', delay: 5000 }
+      { progress: 10, message: t('uploadingGarment'), delay: 500 },
+      { progress: 25, message: t('analyzingGarment'), delay: 1000 },
+      { progress: 40, message: t('preparingAI'), delay: 1500 },
+      { progress: 55, message: t('generatingPhotoshoot'), delay: 2000 },
+      { progress: 70, message: t('applyingLighting'), delay: 3000 },
+      { progress: 85, message: t('finalizingImage'), delay: 4000 },
+      { progress: 95, message: t('almostReady'), delay: 5000 }
     ];
 
     // Start progress simulation
@@ -339,7 +342,7 @@ function App() {
       const response = await generateDesign(garmentImage, modelGender, ethnicity, background, pose, ageGroup, cameraAngle);
       clearInterval(progressInterval);
       setProgress(100);
-      setProgressMessage('Complete!');
+      setProgressMessage(t('complete'));
       
       // Deduct credits on success
       setCredits(prev => prev - cost);
@@ -347,6 +350,12 @@ function App() {
       // Small delay to show 100%
       setTimeout(() => {
         setResult(response.imageUrl);
+        // Show video prompt modal after image is generated (only if no video yet)
+        if (!videoUrl) {
+          setTimeout(() => {
+            setShowVideoPromptModal(true);
+          }, 1000);
+        }
       }, 500);
     } catch (err) {
       clearInterval(progressInterval);
@@ -492,65 +501,193 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
-      {/* Header */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-purple-100 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+      {/* Top Navigation Bar */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo / Brand */}
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.location.reload()}>
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl blur opacity-20"></div>
-                <div className="relative bg-gradient-to-br from-purple-600 to-pink-600 p-3 rounded-2xl">
-                  <Camera className="w-8 h-8 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg blur opacity-30"></div>
+                <div className="relative bg-gradient-to-br from-purple-600 to-pink-600 p-2 rounded-lg">
+                  <Camera className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   {t('appTitle')}
                 </h1>
-                <p className="text-gray-600 text-sm mt-1">{t('appSubtitle')}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              {/* Credits Display */}
-              <div className="flex items-center gap-2 bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-full border-2 border-green-200">
-                <Sparkles className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-bold text-green-900">{credits} {t('credits')}</span>
-              </div>
-              
-              {/* Language Selection Button */}
-              <button
-                onClick={() => setShowLanguageModal(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-cyan-100 hover:from-blue-200 hover:to-cyan-200 px-4 py-2 rounded-full transition-colors border-2 border-blue-200"
-              >
-                <span className="text-lg">{language === 'en' ? '🇬🇧' : '🇹🇷'}</span>
-                <span className="text-sm font-medium text-blue-900">{t('language')}</span>
-              </button>
-              
-              <button
-                onClick={() => setShowPricing(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 px-4 py-2 rounded-full transition-colors"
-              >
-                <DollarSign className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-900">{t('pricing')}</span>
-              </button>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-6">
+              {/* Gallery */}
               <button
                 onClick={() => setShowGallery(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 px-4 py-2 rounded-full transition-colors"
+                className="flex items-center gap-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
               >
-                <ImageIcon className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-900">{t('gallery')}</span>
+                <ImageIcon className="w-4 h-4" />
+                <span>{t('gallery')}</span>
+              </button>
+
+              {/* Pricing */}
+              <button
+                onClick={() => setShowPricing(true)}
+                className="flex items-center gap-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
+              >
+                <DollarSign className="w-4 h-4" />
+                <span>{t('pricing')}</span>
+              </button>
+
+              {/* Language */}
+              <button
+                onClick={() => setShowLanguageModal(true)}
+                className="flex items-center gap-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
+              >
+                <span className="text-lg">{language === 'en' ? '🇬🇧' : '🇹🇷'}</span>
+                <span>{t('language')}</span>
+              </button>
+
+              {/* Divider */}
+              <div className="h-6 w-px bg-gray-300"></div>
+
+              {/* Credits Badge - Interactive */}
+              <button
+                onClick={() => setShowPricing(true)}
+                className="flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 px-4 py-2 rounded-full border border-green-200 transition-all hover:shadow-md"
+                title="Click to buy more credits"
+              >
+                <Sparkles className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-bold text-green-900">{credits}</span>
+                <span className="text-xs text-green-700">{t('credits')}</span>
+              </button>
+
+              {/* Profile Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-full transition-all shadow-md hover:shadow-lg"
+                >
+                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showProfileDropdown && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
+                    <button
+                      onClick={() => {
+                        setShowProfile(true);
+                        setShowProfileDropdown(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 transition-colors"
+                    >
+                      <User className="w-4 h-4 text-purple-600" />
+                      <span className="font-medium">{t('myAccount')}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowProfileDropdown(false);
+                        // Add settings handler
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 transition-colors"
+                    >
+                      <Settings className="w-4 h-4 text-purple-600" />
+                      <span className="font-medium">{t('settings')}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowProfileDropdown(false);
+                        // Add support handler
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 transition-colors"
+                    >
+                      <HelpCircle className="w-4 h-4 text-purple-600" />
+                      <span className="font-medium">{t('support')}</span>
+                    </button>
+                    <div className="border-t border-gray-200 my-2"></div>
+                    <button
+                      onClick={() => {
+                        setShowProfileDropdown(false);
+                        // Add logout handler
+                        alert('Logout functionality');
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="font-medium">{t('logout')}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Menu className="w-6 h-6 text-gray-700" />
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          {showMobileMenu && (
+            <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
+              <button
+                onClick={() => {
+                  setShowGallery(true);
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-colors"
+              >
+                <ImageIcon className="w-5 h-5 text-purple-600" />
+                <span className="font-medium">{t('gallery')}</span>
               </button>
               <button
-                onClick={() => setShowProfile(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-full transition-colors shadow-md"
+                onClick={() => {
+                  setShowPricing(true);
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-colors"
               >
-                <User className="w-4 h-4" />
-                <span className="text-sm font-medium">{t('profile')}</span>
+                <DollarSign className="w-5 h-5 text-purple-600" />
+                <span className="font-medium">{t('pricing')}</span>
+              </button>
+              <button
+                onClick={() => {
+                  setShowLanguageModal(true);
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-colors"
+              >
+                <span className="text-xl">{language === 'en' ? '🇬🇧' : '🇹🇷'}</span>
+                <span className="font-medium">{t('language')}</span>
+              </button>
+              <div className="border-t border-gray-200 my-2"></div>
+              <div className="px-4 py-2">
+                <div className="flex items-center justify-between bg-green-50 px-4 py-3 rounded-lg border border-green-200">
+                  <span className="text-sm font-medium text-gray-700">{t('credits')}</span>
+                  <span className="text-lg font-bold text-green-900">{credits}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowProfile(true);
+                  setShowMobileMenu(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-colors"
+              >
+                <User className="w-5 h-5 text-purple-600" />
+                <span className="font-medium">{t('myAccount')}</span>
               </button>
             </div>
-          </div>
+          )}
         </div>
-      </header>
+      </nav>
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -1003,19 +1140,36 @@ function App() {
                   
                   {/* Generate Video Button / Progress */}
                   {!videoLoading ? (
-                    <button
-                      onClick={handleGenerateVideo}
-                      disabled={videoLoading || credits < videoCost}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
-                      title={credits < videoCost ? `Not enough credits. You need ${videoCost} credits but only have ${credits}.` : 'Create a short video from this result. Cost: 6 credits.'}
-                      aria-label="Generate video from photoshoot, costs 6 credits"
-                    >
-                      <Video className="w-5 h-5" />
-                      <div className="flex flex-col items-center">
-                        <span>{credits < videoCost ? 'Not Enough Credits' : 'Generate Video'}</span>
-                        <span className="text-xs font-normal opacity-90">{videoCost} credits</span>
-                      </div>
-                    </button>
+                    <div className="relative">
+                      {/* Animated Glow Effect */}
+                      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
+                      
+                      <button
+                        onClick={handleGenerateVideo}
+                        disabled={videoLoading || credits < videoCost}
+                        className="relative w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg hover:from-cyan-400 hover:via-blue-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-2xl hover:shadow-cyan-500/50 hover:scale-105 group"
+                        title={credits < videoCost ? `Not enough credits. You need ${videoCost} credits but only have ${credits}.` : 'Create a short video from this result. Cost: 6 credits.'}
+                        aria-label="Generate video from photoshoot, costs 6 credits"
+                      >
+                        {/* Sparkle Icon */}
+                        <div className="relative">
+                          <Video className="w-6 h-6 animate-pulse" />
+                          <Sparkles className="w-3 h-3 absolute -top-1 -right-1 text-yellow-300" />
+                        </div>
+                        
+                        <div className="flex flex-col items-center">
+                          <div className="flex items-center gap-2">
+                            <span className="text-shadow-lg">{credits < videoCost ? 'Not Enough Credits' : '🎬 Generate Video'}</span>
+                          </div>
+                          <span className="text-xs font-normal opacity-90 bg-white/20 px-2 py-0.5 rounded-full mt-1">{videoCost} credits</span>
+                        </div>
+                        
+                        {/* Shine Effect */}
+                        <div className="absolute inset-0 rounded-xl overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        </div>
+                      </button>
+                    </div>
                   ) : (
                     <div className="w-full bg-white border-2 border-blue-200 rounded-lg p-4">
                       <div className="flex items-center gap-3 mb-3">
@@ -1111,10 +1265,10 @@ function App() {
       </footer>
 
       {/* Gallery Modal */}
-      {showGallery && <Gallery onClose={() => setShowGallery(false)} />}
+      {showGallery && <Gallery onClose={() => setShowGallery(false)} t={t} language={language} />}
 
       {/* Profile Modal */}
-      {showProfile && <Profile onClose={() => setShowProfile(false)} />}
+      {showProfile && <Profile onClose={() => setShowProfile(false)} t={t} language={language} />}
 
       {/* Fullscreen Image Modal */}
       {showFullscreen && result && (
@@ -1677,6 +1831,107 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Video Generation Prompt Modal */}
+      {showVideoPromptModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 flex items-center justify-center p-4" onClick={() => setShowVideoPromptModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-bounce" onClick={(e) => e.stopPropagation()}>
+            {/* Sparkles Animation */}
+            <div className="flex justify-center mb-4">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 rounded-full blur-lg opacity-75 animate-pulse"></div>
+                <div className="relative bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold text-lg px-6 py-3 rounded-full shadow-xl">
+                  🎬 NEW! 🎬
+                </div>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-2xl font-bold text-gray-900 text-center mb-3">
+              {t('tryVideoGeneration')}
+            </h3>
+            
+            {/* Description */}
+            <div className="text-center mb-6">
+              <p className="text-gray-600 mb-2">
+                {t('videoGenerationDesc')}
+              </p>
+              <div className="flex items-center justify-center gap-2 mt-3">
+                <Sparkles className="w-5 h-5 text-yellow-500" />
+                <span className="text-sm font-semibold text-purple-600">
+                  {t('only')} {videoCost} {t('credits').toLowerCase()}!
+                </span>
+                <Sparkles className="w-5 h-5 text-yellow-500" />
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setShowVideoPromptModal(false)}
+                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
+              >
+                {t('notNow')}
+              </button>
+              <button
+                onClick={() => {
+                  setShowVideoPromptModal(false);
+                  handleGenerateVideo();
+                }}
+                disabled={credits < videoCost}
+                className="px-6 py-3 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-cyan-400 hover:via-blue-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:scale-105"
+              >
+                🎬 {t('yesGenerate')}
+              </button>
+            </div>
+
+            {/* Insufficient Credits Warning */}
+            {credits < videoCost && (
+              <p className="text-xs text-red-600 text-center mt-3">
+                ⚠️ {t('needMoreCredits')}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+            {/* Left - Copyright */}
+            <div className="text-gray-600 text-sm">
+              © 2025 ModaModel Kids
+            </div>
+
+            {/* Center - Links */}
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <button className="text-gray-600 hover:text-purple-600 transition-colors font-medium">
+                {t('about')}
+              </button>
+              <span className="text-gray-300">•</span>
+              <button className="text-gray-600 hover:text-purple-600 transition-colors font-medium">
+                {t('faq')}
+              </button>
+              <span className="text-gray-300">•</span>
+              <button className="text-gray-600 hover:text-purple-600 transition-colors font-medium">
+                {t('contact')}
+              </button>
+            </div>
+
+            {/* Right - Legal */}
+            <div className="flex items-center justify-center md:justify-end gap-4 text-sm">
+              <button className="text-gray-600 hover:text-purple-600 transition-colors font-medium">
+                {t('terms')}
+              </button>
+              <span className="text-gray-300">•</span>
+              <button className="text-gray-600 hover:text-purple-600 transition-colors font-medium">
+                {t('privacy')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -1,12 +1,16 @@
 export const translations = {
   en: {
-    // Header
+    // Header/Navigation
     appTitle: "ModaModel Kids",
-    appSubtitle: "AI-Powered Fashion Photography",
-    credits: "Credits",
-    language: "Language",
-    pricing: "Pricing",
+    appSubtitle: "AI-Powered Kids Fashion Photography",
     gallery: "Gallery",
+    pricing: "Pricing",
+    profile: "Profile",
+    credits: "Credits",
+    myAccount: "My Account",
+    settings: "Settings",
+    support: "Support",
+    logout: "Logout",
     profile: "Profile",
     
     // Hero Section
@@ -172,6 +176,15 @@ export const translations = {
     popular: "POPULAR",
     photoshoots: "Photoshoots",
     creditsNeverExpire: "Credits never expire",
+    
+    // Video Prompt Modal
+    tryVideoGeneration: "Want to Try Video Generation?",
+    videoGenerationDesc: "Turn your photoshoot into an amazing 6-second animated video!",
+    only: "Only",
+    notNow: "Not Now",
+    yesGenerate: "Yes, Generate!",
+    needMoreCredits: "Not enough credits for video generation",
+    
     pricingStructure: "Pricing Structure:",
     baseCost: "Base Cost",
     baseCostDesc: "Upload Garment → 4 credits (always required)",
@@ -199,6 +212,50 @@ export const translations = {
     insufficientCreditsImage: "Insufficient credits. You need {cost} credits but only have {balance}.",
     insufficientCreditsVideo: "Insufficient credits. You need 6 credits but only have {balance}.",
     generatePhotoshootError: "Please generate a photoshoot first",
+    
+    // Footer
+    about: "About",
+    faq: "FAQ",
+    contact: "Contact",
+    terms: "Terms",
+    privacy: "Privacy",
+    
+    // Gallery
+    myGallery: "My Gallery",
+    selectItems: "Select Items",
+    selectAll: "Select All",
+    selected: "selected",
+    cancel: "Cancel",
+    download: "Download",
+    delete: "Delete",
+    images: "Images",
+    videos: "Videos",
+    loading: "Loading...",
+    noImagesYet: "No images yet",
+    noVideosYet: "No videos yet",
+    generateFirstPhotoshoot: "Generate your first photoshoot to see it here!",
+    generateFirstVideo: "Generate your first video to see it here!",
+    deleteConfirm: "Are you sure you want to delete this photoshoot?",
+    deleteVideoConfirm: "Are you sure you want to delete this video?",
+    deleteBulkConfirm: "Are you sure you want to delete {count} item(s)?",
+    deleteFailedPhotoshoot: "Failed to delete photoshoot",
+    deleteFailedVideo: "Failed to delete video",
+    fullSize: "Full size",
+    reset: "Reset",
+    clickAnywhereToClose: "Click anywhere to close",
+    videoPlayback: "Video Playback",
+    useZoomControls: "Use zoom controls to adjust size",
+    
+    // Progress Messages
+    initializing: "Initializing...",
+    uploadingGarment: "Uploading garment image...",
+    analyzingGarment: "Analyzing garment details...",
+    preparingAI: "Preparing AI model...",
+    generatingPhotoshoot: "Generating photoshoot...",
+    applyingLighting: "Applying lighting effects...",
+    finalizingImage: "Finalizing image...",
+    almostReady: "Almost ready...",
+    complete: "Complete!",
   },
   tr: {
     // Header
@@ -209,6 +266,10 @@ export const translations = {
     pricing: "Fiyatlandırma",
     gallery: "Galeri",
     profile: "Profil",
+    myAccount: "Hesabım",
+    settings: "Ayarlar",
+    support: "Destek",
+    logout: "Çıkış Yap",
     
     // Hero Section
     heroTag: "Yapay Zeka Destekli Moda Teknolojisi",
@@ -373,6 +434,15 @@ export const translations = {
     popular: "POPÜLER",
     photoshoots: "Fotoğraf Çekimi",
     creditsNeverExpire: "Krediler asla sona ermez",
+    
+    // Video Prompt Modal
+    tryVideoGeneration: "Video Oluşturmayı Denemek İster misiniz?",
+    videoGenerationDesc: "Fotoğraf çekiminizi muhteşem 6 saniyelik animasyonlu videoya dönüştürün!",
+    only: "Sadece",
+    notNow: "Şimdi Değil",
+    yesGenerate: "Evet, Oluştur!",
+    needMoreCredits: "Video oluşturma için yeterli kredi yok",
+    
     pricingStructure: "Fiyatlandırma Yapısı:",
     baseCost: "Temel Maliyet",
     baseCostDesc: "Kıyafet Yükle → 4 kredi (her zaman gerekli)",
@@ -393,12 +463,56 @@ export const translations = {
     fullCustomization: "Tam Özelleştirme",
     fullCustomizationDesc: "Tüm 5 seçenek seçildi",
     withVideo: "Video ile",
-    withVideoDesc: "Tam özel + video",
+    withVideoDesc: "Tam özelleştirme + video",
     
     // Errors
-    uploadGarmentError: "Lütfen bir kıyafet görseli yükleyin",
+    uploadGarmentError: "Lütfen bir kıyafet resmi yükleyin",
     insufficientCreditsImage: "Yetersiz kredi. {cost} krediye ihtiyacınız var ancak sadece {balance} krediniz var.",
     insufficientCreditsVideo: "Yetersiz kredi. 6 krediye ihtiyacınız var ancak sadece {balance} krediniz var.",
     generatePhotoshootError: "Lütfen önce bir fotoğraf çekimi oluşturun",
+    
+    // Footer
+    about: "Hakkında",
+    faq: "SSS",
+    contact: "İletişim",
+    terms: "Şartlar",
+    privacy: "Gizlilik",
+    
+    // Gallery
+    myGallery: "Galerim",
+    selectItems: "Öğeleri Seç",
+    selectAll: "Tümünü Seç",
+    selected: "seçildi",
+    cancel: "İptal",
+    download: "İndir",
+    delete: "Sil",
+    images: "Görseller",
+    videos: "Videolar",
+    loading: "Yükleniyor...",
+    noImagesYet: "Henüz görsel yok",
+    noVideosYet: "Henüz video yok",
+    generateFirstPhotoshoot: "İlk fotoğraf çekiminizi oluşturun!",
+    generateFirstVideo: "İlk videonuzu oluşturun!",
+    deleteConfirm: "Bu fotoğraf çekimini silmek istediğinizden emin misiniz?",
+    deleteVideoConfirm: "Bu videoyu silmek istediğinizden emin misiniz?",
+    deleteBulkConfirm: "{count} öğeyi silmek istediğinizden emin misiniz?",
+    deleteFailedPhotoshoot: "Fotoğraf çekimi silinemedi",
+    deleteFailedVideo: "Video silinemedi",
+    fullSize: "Tam boyut",
+    reset: "Sıfırla",
+    clickAnywhereToClose: "Kapatmak için herhangi bir yere tıklayın",
+    videoPlayback: "Video Oynatma",
+    useZoomControls: "Boyutu ayarlamak için yakınlaştırma kontrollerini kullanın",
+    
+    // Progress Messages
+    initializing: "Başlatılıyor...",
+    uploadingGarment: "Kıyafet görseli yükleniyor...",
+    analyzingGarment: "Kıyafet detayları analiz ediliyor...",
+    preparingAI: "Yapay zeka modeli hazırlanıyor...",
+    generatingPhotoshoot: "Fotoğraf çekimi oluşturuluyor...",
+    applyingLighting: "Işık efektleri uygulanıyor...",
+    finalizingImage: "Görsel tamamlanıyor...",
+    almostReady: "Neredeyse hazır...",
+    complete: "Tamamlandı!",
   }
 };
